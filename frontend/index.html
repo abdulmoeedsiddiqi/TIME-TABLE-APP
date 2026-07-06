@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GIKI Automated Timetable System</title>
+  <link rel="stylesheet" href="/static/styles.css?v=2" />
+</head>
+
+<body>
+  <header class="hero">
+    <div>
+      <p class="eyebrow">CS378 Semester Project</p>
+      <h1>GIKI Automated Timetable System</h1>
+      <p class="subtitle">Generate Monday–Friday timetables for all faculties while enforcing teacher, room, section,
+        and session constraints.</p>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <main class="layout">
+    <section class="panel controls">
+      <h2>1. Data Setup</h2>
+      <button id="loadStaticBtn">Load Rooms + Prospectus</button>
+      <p class="hint">Run this once after migration. It loads files from the project <code>data/</code> folder.</p>
+
+      <h2>2. Upload Semester Courses</h2>
+      <input id="courseFile" type="file" accept=".xlsx" />
+      <button id="uploadBtn">Upload Course File</button>
+      <div id="uploadResult" class="result"></div>
+
+      <h2>3. Generate</h2>
+      
+      <label>Faculty / Department</label>
+      <select id="facultyFilter">
+        <option value="all">All faculties</option>
+      </select>
+      <label>Program</label>
+      <select id="programFilter">
+        <option value="all">All programs</option>
+      </select>
+      <label>Year</label>
+      <select id="yearFilter">
+        <option value="all">All years</option>
+        <option value="1">Year 1</option>
+        <option value="2">Year 2</option>
+        <option value="3">Year 3</option>
+        <option value="4">Year 4</option>
+      </select>
+      <button id="generateBtn" class="primary">Generate Timetable</button>
+      <button id="clearBtn" class="danger">Clear Timetable</button>
+      <a class="export" href="/api/timetable/export/">Export CSV</a>
+      <div id="message" class="result"></div>
+
+      <!-- Generation Progress Bar -->
+      <div id="progressContainer" class="progress-container hidden">
+        <div class="progress-header">
+          <span id="progressLabel">Generating timetable...</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+          <div class="progress-glow" id="progressGlow"></div>
+        </div>
+        <div class="progress-footer">
+          <span id="progressPhase">Initializing solver...</span>
+          <span id="progressElapsed">0s elapsed</span>
+        </div>
+      </div>
+
+      <!-- Hard Constraint Status Panel -->
+      <div id="constraintPanel" class="constraint-panel hidden">
+        <h2>Hard Constraint Status</h2>
+        <div class="constraint-grid">
+          <div class="constraint-card" id="hc1Card">
+            <span class="constraint-icon" id="hc1Icon">⏳</span>
+            <div>
+              <strong>HC1 · Teacher</strong>
+              <p id="hc1Detail">No teacher double-booking</p>
+            </div>
+          </div>
+          <div class="constraint-card" id="hc2Card">
+            <span class="constraint-icon" id="hc2Icon">⏳</span>
+            <div>
+              <strong>HC2 · Room</strong>
+              <p id="hc2Detail">No room double-booking</p>
+            </div>
+          </div>
+          <div class="constraint-card" id="hc3Card">
+            <span class="constraint-icon" id="hc3Icon">⏳</span>
+            <div>
+              <strong>HC3 · Section</strong>
+              <p id="hc3Detail">No section overlap</p>
+            </div>
+          </div>
+          <div class="constraint-card" id="hc4Card">
+            <span class="constraint-icon" id="hc4Icon">⏳</span>
+            <div>
+              <strong>HC4 · Sessions</strong>
+              <p id="hc4Detail">All sessions scheduled</p>
+            </div>
+          </div>
+        </div>
+        <div class="constraint-summary" id="constraintSummary"></div>
+      </div>
+    </section>
+
+    <section class="panel output">
+      <div class="topbar">
+        <div>
+          <h2>Generated Timetable</h2>
+          <p class="hint">Days are restricted to Monday–Friday only.</p>
+        </div>
+        <input id="searchBox" placeholder="Search course, teacher, section, room..." />
+      </div>
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Time</th>
+              <th>Course</th>
+              <th>Title</th>
+              <th>Teacher</th>
+              <th>Section</th>
+              <th>Room</th>
+              <th>Faculty</th>
+            </tr>
+          </thead>
+          <tbody id="timetableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js?v=3"></script>
+</body>
+
+</html>
